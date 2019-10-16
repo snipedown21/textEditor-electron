@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Photon</title>
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/photon.css">
+    <style>
+      .editable-area {
+        width: 100%;
+        height: 100%;
+        resize: none;
+        border: none;
+        outline: none;
+        font-size: 20px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Wrap your entire app inside .window -->
+    <div class="window">
+      <!-- .toolbar-header sits at the top of your app -->
+      <header class="toolbar toolbar-header">
+        <div class="toolbar-actions">
+    <div class="btn-group">
+      <button class="btn btn-default" onClick="increaseFont()">
+        <span class="icon icon-plus"></span>
+      </button>
+      <button class="btn btn-default" onClick="decreaseFont()">
+        <span class="icon icon-minus"></span>
+      </button>
+    </div>
+
+    <button class="btn btn-default pull-right" onClick="saveText()">
+      <span class="icon icon-download icon-text"></span>
+      Save
+    </button>
+  </div>
+      </header>
+
+      <!-- Your app's content goes inside .window-content -->
+      <div class="window-content">
+        <textarea class="editable-area"></textarea>
+      </div>
+    </div>
+    <script>
+      const { ipcRenderer } = require('electron');
+      let textarea = document.querySelector('.editable-area');
+      let defaultFontSize = 20;
+
+      function increaseFont() {
+        textarea.style.fontSize = `${++defaultFontSize}px`;
+      }
+
+      function decreaseFont() {
+        textarea.style.fontSize = `${--defaultFontSize}px`;
+      }
+
+      function saveText() {
+        let text = textarea.value;
+        ipcRenderer.send('SAVE_TEXT', text);
+      }
+
+      ipcRenderer.on('TEXT_SAVED', (event, result) => {
+        if(result === 'success') {
+          textarea.style.backgroundColor = '#b2ff99';
+        }
+        else {
+          textarea.style.backgroundColor = '#ff8989';
+        }
+
+        setTimeout(() => {
+          textarea.style.backgroundColor = '';
+        }, 1000);
+      });
+
+      ipcRenderer.on('SAVE_MENU_CLICKED', () => {
+        saveText();
+      });
+
+    </script>
+  </body>
+</html>
